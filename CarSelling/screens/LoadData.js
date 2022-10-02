@@ -6,7 +6,7 @@ export default function LoadData() {
     const [posts, setPosts] = useState([]);
 
     useEffect(() => {
-        fetch('https://jsonplaceholder.typicode.com/posts')
+        fetch('http://192.168.8.182:4000/vehicle/')
             .then((response) => response.json())
             .then((json) => setPosts(json));
     })
@@ -17,8 +17,9 @@ export default function LoadData() {
                 data={posts}
                 renderItem={({ item }) =>
                     <TouchableOpacity style={{borderWidth:1, marginBottom:'5%', padding:5}} onPress={()=>{console.log("hello");}}>
-                        <Text style={{marginBottom:10,fontWeight:'bold'}} >{item.title}</Text>
-                        <Text style={{marginBottom:10}} >{item.body}</Text>
+                        <Text style={{marginBottom:10,fontWeight:'bold',color:"black"}} >{item.vehicleimg}</Text>
+                        <Text style={{marginBottom:10,color:"black"}} >{item.vehiclename}</Text>
+                        <Text style={{marginBottom:10,color:"black"}} >{item.price}</Text>
                     </TouchableOpacity>
                 }
             />

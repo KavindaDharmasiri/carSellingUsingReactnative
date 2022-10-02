@@ -1,4 +1,6 @@
 const express = require('express')
+const multer = require('multer');
+const upload = multer({dest:'uploads/'}).single("demo_image");
 
 const user = require('./routes/user')
 const vehicle = require('./routes/vehicle')
