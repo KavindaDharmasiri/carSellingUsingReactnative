@@ -25,7 +25,7 @@ export default function Register({ navigation }) {
     }
 
     const saveData = () => {
-        
+        setId();
         fetch('http://192.168.8.182:4000/users/', {
             method: 'POST',
             headers: {
@@ -33,7 +33,7 @@ export default function Register({ navigation }) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                id: "U001",
+                id: id,
                 name: name,
                 address: address,
                 contact: contact,
@@ -48,6 +48,7 @@ export default function Register({ navigation }) {
       
         getUsers()
 
+        if(posts.length != 0){
         var id2=posts[posts.length-1].id; 
 
         
@@ -65,6 +66,7 @@ export default function Register({ navigation }) {
         } else {
             id = 'U001'
         }
+    }
         console.log(id)
     }
 
@@ -76,8 +78,8 @@ export default function Register({ navigation }) {
     }
     return (
         <NativeBaseProvider>
-            <Text fontSize="3xl" bold underline mt="10%" ml="30%">User Registeration</Text>
-            <VStack space={4} alignItems="center" mt="15%">
+            <Text fontSize="3xl" bold mt="10%" ml="30%">User Registeration</Text>
+            <VStack style={{position:"relative",margin:"auto"}} space={4} alignItems="center" mt="15%">
                 <Input mx="3" value={name} onChangeText={(e) => { setName(e) }} placeholder="Name" w="80%" />
                 <Input mx="3" value={address} onChangeText={(e) => { setaddress(e) }} placeholder="address" w="80%" />
                 <Input mx="3" value={contact} onChangeText={(e) => { setcontact(e) }} placeholder="contact No" w="80%" />
@@ -85,10 +87,7 @@ export default function Register({ navigation }) {
           
                 <Button size="lg" w="80%" variant="subtle" colorScheme="secondary" onPress={saveData}>
                     Save User
-                </Button>
-                <Button size="md" variant="subtle" colorScheme="green" onPress={()=>{navigation.navigate("Car Selling - Login")}}>
-                    Clik To Login
-                </Button>
+                </Button>               
             </VStack>
         </NativeBaseProvider>
     )

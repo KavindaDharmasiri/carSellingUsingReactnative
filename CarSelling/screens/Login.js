@@ -9,12 +9,15 @@ export default function Login({ navigation }) {
   const [password, setPassword] = useState('');
   const [posts, setPosts] = useState([]);
 
+
+  useEffect(() => {
+        validateData()
+
+  })
 const validateData = async() => {
     fetch('http://192.168.8.182:4000/users/')
         .then((response) => response.json())
         .then((json) => setPosts(json));
-
-        search();
 }
 
 const search = () =>{
@@ -23,8 +26,10 @@ const search = () =>{
         if(name === posts[i].name){
             if(password === posts[i].password){
                 b=false;
+                setPassword('')
+                setName('')
                 Alert.alert("login succses");
-
+                navigation.navigate("Car Selling - LoadData")
             }
         }
     }
@@ -36,17 +41,15 @@ const search = () =>{
 
   return (
     <NativeBaseProvider>
-        <Text fontSize="3xl" bold underline mt="10%" ml="30%">User Login</Text>
+        <Text fontSize="3xl" bold mt="10%" ml="30%">User Login</Text>
         <VStack space={4} alignItems="center" mt="15%">
             <Input mx="3" value={name} onChangeText={(e) => { setName(e) }} placeholder="Name" w="80%" />
             <Input mx="3" value={password} onChangeText={(e) => { setPassword(e) }} placeholder="Password" w="80%" />
       
-            <Button size="lg" w="80%" variant="subtle" colorScheme="secondary" onPress={validateData}>
+            <Button size="lg" w="80%" variant="subtle" colorScheme="secondary" onPress={search}>
                 Log
             </Button>
-            <Button size="md" variant="subtle" colorScheme="green" onPress={()=>{navigation.navigate("Car Selling - AddData")}}>
-                Clik To loaddata
-            </Button>
+            
         </VStack>
     </NativeBaseProvider>
 )

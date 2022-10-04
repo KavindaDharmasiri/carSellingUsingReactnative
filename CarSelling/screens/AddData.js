@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { NativeBaseProvider, Text, Input, VStack, Button, Avatar } from 'native-base'
+import { useEffect } from 'react';
+import { NativeBaseProvider, Text, Input, VStack, Button, Avatar, View } from 'native-base'
 import { Alert,Image } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 
@@ -17,17 +18,61 @@ const options ={
 }
 
 export default function AddData({navigation}) {
-    const [pic,setPic] = React.useState('');
 
+    const [posts, setPosts] = useState([]);
+    const [vehiclename, setvehiclename] = useState('');
+    const [price, setprice] = useState('');
+    const [selectedImage, setSelectedImage] = useState();
+    const [selectedUri, setSelectedUri] = useState();
+
+    var id = "C001"
+    var t=0;
+
+    useEffect(() => {
+        
+        if(selectedImage == null){
+            const exampleImage = require('../assests/cloud-upload-vector-flat-icon-98690946.jpg')
+            setSelectedImage(exampleImage)
+        }
+        getCars()
+    })
+
+    const getCars = () => {
+        fetch('http://192.168.8.182:4000/vehicle/')
+        .then((response) => response.json())
+        .then((json) => setPosts(json));
+    }
+
+    const setId = () => {
+      
+        getCars()
+
+        if(posts.length != 0){
+            var id2=posts[posts.length-1].code; 
+
+            let temp = parseInt(id2.slice(1))        
+        
+            if (temp < 1) {
+                id = 'C001'
+            } else if (temp < 9) {
+                id = 'C00' + (temp + 1)
+            } else if (temp < 99) {
+                id = 'C0' + (temp + 1)
+            } else if (temp < 999) {
+                id = 'C' + (temp + 1)
+            } else {
+                id = 'C001'
+            }
+        }
+    }
 
     const openGallery=async()=>{
-
+    
         const images = await launchImageLibrary(options);
 
-        console.log(images.assets[0].uri)
-        console.log(images.assets[0].type)
-        console.log(images.assets[0].fileName)
-        
+        setSelectedImage(images.assets[0])
+        setSelectedUri(images.assets[0].uri)
+    
         const formdata = new FormData()
         formdata.append('file',{
             uri:images.assets[0].uri,
@@ -42,31 +87,19 @@ export default function AddData({navigation}) {
                 'Content-type': 'multipart/form-data',
             },
         });
-
         let responsejson =await res.json();
-        setPic(responsejson.name);
-
     }
 
-    const [vehiclename, setvehiclename] = useState('');
-    const [vehicleimg, setvehicleimg] = useState('');
-    const [price, setprice] = useState('');
-
-    var code = "C001"
-
     const saveData = () => {
-        console.log(code)
-        console.log(vehiclename)
-        console.log(pic)
-        console.log(price)
-
+        setId();
+        
         fetch('http://192.168.8.182:4000/vehicle/', {
             method: 'POST',
             body: JSON.stringify({
-                code: code,
+                code: id,
                 vehiclename: vehiclename,
-                vehicleimg: pic,
-                price: price
+                vehicleimg: selectedUri,
+                price: price,
             }),
             headers: {
                 'Content-type': 'application/json; charset=UTF-8',
@@ -75,31 +108,27 @@ export default function AddData({navigation}) {
             .then((response) => {Alert.alert("Save Saved Successfully !")})
             .catch((err)=>{Alert.alert("Error occured !")})
     }
-
+      
     return (
         <NativeBaseProvider>
-            <Text fontSize="3xl" bold underline mt="10%" ml="30%">Save Car</Text>
+            <View style={{ backgroundColor:"#dedede",height:"100%"}}>
+            <Text fontSize="3xl" bold  mt="10%" ml="30%">     Save Car</Text>
             <VStack space={4} alignItems="center" mt="15%">
 
+            <Image style={{width:200,height:200,borderRadius:25}} source={selectedImage}/>            
 
-            <Image source = {require('../assests/2a32feb3-8f97-4044-a92a-edd3b13048a0.png')} />
-
-            <Button size="md" w="80%" variant="subtle" colorScheme="green" onPress={openGallery}>
+                <Button size="md" w="80%" variant="subtle" colorScheme="green" onPress={openGallery}>
                     upload
                 </Button>
                 
-                
-                <Input mx="3" value={vehicleimg} onChangeText={(e) => { setvehicleimg(e) }} placeholder="vehicle image" w="80%" />
-                <Input mx="3" value={vehiclename} onChangeText={(e) => { setvehiclename(e) }} placeholder="vehicle name" w="80%" />
-                <Input mx="3" value={price} onChangeText={(e) => { setprice(e) }} placeholder="Price" w="80%" />
+                <Input style={{backgroundColor:"white",borderRadius:25}} mx="3" value={vehiclename} onChangeText={(e) => { setvehiclename(e) }} placeholder="vehicle name" w="80%" />
+                <Input style={{backgroundColor:"white",borderRadius:25}} mx="3" value={price} onChangeText={(e) => { setprice(e) }} placeholder="Price" w="80%" />
                 
                 <Button size="md" w="80%" variant="subtle" colorScheme="secondary" onPress={saveData}>
                     save Car
                 </Button>
-                <Button size="md" w="80%" variant="subtle" colorScheme="green" onPress={()=>{navigation.navigate("Car Selling - LoadData")}}>
-                    view cars
-                </Button>
             </VStack>
+            </View>
         </NativeBaseProvider>
     )
 }

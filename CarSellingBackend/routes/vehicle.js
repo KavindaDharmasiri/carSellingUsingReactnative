@@ -12,7 +12,7 @@ connection.connect(function (err) {
         console.log(err);
     } else {
         console.log('Connected to the MySQL server');
-        var itemTableQuery = "CREATE TABLE IF NOT EXISTS vehicle (code VARCHAR(255) PRIMARY KEY, vehiclename VARCHAR(255), vehicleimg VARCHAR(255),price VARCHAR(255))"
+        var itemTableQuery = "CREATE TABLE IF NOT EXISTS vehicle (code VARCHAR(255) PRIMARY KEY, vehiclename VARCHAR(255), vehicleimg VARCHAR(255),price VARCHAR(255),uri VARCHAR(255))"
         connection.query(itemTableQuery, function (err, result) {
 
             if (result.warningCount === 0) {
@@ -23,6 +23,7 @@ connection.connect(function (err) {
 })
 
 router.get('/', (req, res) => {
+    console.log("ok")
     var query = "SELECT * FROM vehicle";
     connection.query(query, (err, rows) => {
         if (err) console.log(err)
@@ -36,6 +37,8 @@ router.post('/image', (req, res) => {
 })
 */
 
+var fileTemp='';
+
 router.post('/image', upload.single('file'), async function (req, res) {
     const imagePath = path.join(__dirname, '../../carSelling/assests');
     const fileUpload = new Resize(imagePath);
@@ -43,7 +46,20 @@ router.post('/image', upload.single('file'), async function (req, res) {
         res.status(401).json({error: 'Please provide an image'});
     }
     const filename = await fileUpload.save(req.file.buffer);
-    console.log(filename)
+
+    fileTemp=filename;
+    console.log(fileTemp)
+    return res.status(200).json({ name: filename });
+
+});
+
+router.post('/imageUpdate', upload.single('file'), async function (req, res) {
+    const imagePath = path.join(__dirname, '../../carSelling/assests');
+    const fileUpload = new Resize(imagePath);
+    if (!req.file) {
+        res.status(401).json({error: 'Please provide an image'});
+    }
+    const filename = await fileUpload.save(req.file.buffer);
     return res.status(200).json({ name: filename });
 
 });
@@ -51,17 +67,12 @@ router.post('/image', upload.single('file'), async function (req, res) {
 router.post('/', (req, res) => {
     const code = req.body.code
     const vehiclename = req.body.vehiclename
-    const vehicleimg = req.body.vehicleimg
     const price = req.body.price
-    console.log("awa")
-    console.log(code)
-    console.log(vehiclename)
-    console.log(vehicleimg)
-    console.log(price)
+    const uri = req.body.vehicleimg
 
-    var query = "INSERT INTO vehicle (code, vehiclename, vehicleimg,price) VALUES (?, ?, ?, ?)";
+    var query = "INSERT INTO vehicle (code, vehiclename, vehicleimg,price,uri) VALUES (?, ?, ?, ?,?)";
 
-    connection.query(query, [code, vehiclename, vehicleimg , price], (err) => {
+    connection.query(query, [code, vehiclename, fileTemp , price , uri], (err) => {
         if (err) {
             res.send({'message': 'duplicate entry'})
         } else {
@@ -76,10 +87,11 @@ router.put('/', (req, res) => {
     const vehiclename = req.body.vehiclename
     const vehicleimg = req.body.vehicleimg
     const price = req.body.price
+    const uri = req.body.uri
 
-    var query = "UPDATE vehicle SET vehiclename=?, vehicleimg=?, price=? WHERE code=?";
+    var query = "UPDATE vehicle SET vehiclename=?, vehicleimg=?, price=?, uri=? WHERE code=?";
 
-    connection.query(query, [vehiclename, vehicleimg,price, code], (err, rows) => {
+    connection.query(query, [vehiclename, vehicleimg,price, uri , code], (err, rows) => {
         if (err) console.log(err);
 
         if (rows.affectedRows > 0) {
